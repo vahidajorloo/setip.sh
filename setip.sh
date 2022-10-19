@@ -22,10 +22,13 @@ rm -rf ~/greenlight/db ~/greenlight/log ~/greenlight/storage
 sed -i "/BIGBLUEBUTTON_ENDPOINT/c\BIGBLUEBUTTON_ENDPOINT=https:\/\/$new_domain\/bigbluebutton/" ~/greenlight/.env
 secret2=$(bbb-conf --secret | grep Secret: | sed 's/Secret://' | sed 's/ //g')
 export secret2
-sed -i "/BIGBLUEBUTTON_SECRET=/c\BIGBLUEBUTTON_SECRET=$secret2/" ~/greenlight/.env
-sed -i "/SAFE_HOSTS/c\SAFE_HOSTS=$new_domain/" ~/greenlight/.env
+sed -i "/BIGBLUEBUTTON_SECRET=/c\BIGBLUEBUTTON_SECRET=$secret2" ~/greenlight/.env
+sed -i "/SAFE_HOSTS/c\SAFE_HOSTS=$new_domain" ~/greenlight/.env
 docker run --rm --env-file .env bigbluebutton/greenlight:v2 bundle exec rake conf:check
 docker-compose up -d
 service nginx restart
 bbb-conf --restart
+sed -i "s/workshops.tehranclass.ir/$new_domain/g" /etc/zabbix/zabbix_agentd.conf
+service zabbix-agent restart
 docker exec greenlight-v2 bundle exec rake admin:create
+
